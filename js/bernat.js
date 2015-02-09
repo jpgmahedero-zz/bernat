@@ -3,19 +3,72 @@
           var bodies = []; // instances of b2Body (from Box2D)
           var actors = []; // instances of Bitmap (from IvanK)
           var up;
-          var primer = ['abraham.png',
-                         'ayoub.png',
-                         'camino.png',
-                         'cristina.png',
-                         'frandy.png',
-                         'jordi.png',
-                         'mahamadou.png',
-                         'mahtab.png',
-                         'moha.png',
-                         'shamas.png',
-                         'sufian.png',
-                         'taimoor.png',
-                         'xinsen.png'
+          var primer = ['abdullah.png',
+'abraham.png',
+'ahmed.png',
+'ayoub.png',
+'bilawal.png',
+'camino.png',
+'cristina.png',
+'cristobal.png',
+'danileon.png',
+'eguizabal.png',
+'frandy.png',
+'isaac.png',
+'ismael.png',
+'ivanayora.png',
+'jonathan2.png',
+'jordi.png',
+'joseluis.png',
+'josue.png',
+'leslie.png',
+'mahamadou.png',
+'mahtab.png',
+'mendoza.png',
+'moha.png',
+'ricard.png',
+'seydou.png',
+'shamas.png',
+'sufian.png',
+'taimoor.png',
+'umar.png',
+'xinsen.png',
+'ahsan.png',
+'albert.png',
+'alex.png',
+'alfonso.png',
+'alikhalid.png',
+'andres.png',
+'angel.png',
+'ashimu.png',
+'chaimae.png',
+'danielarias.png',
+'david.png',
+'dcordoba.png',
+'dfuentes.png',
+'dgazquez.png',
+'dilawar.png',
+'edgar.png',
+'erwin.png',
+'gianluca.png',
+'igot.png',
+'ivanayora.png',
+'jantonio.png',
+'javi.png',
+'jesus.png',
+'jonathan.png',
+'juanheredia.png',
+'kevin.png',
+'marccabrera.png',
+'marcgarrido.png',
+'naveed.png',
+'noelia.png',
+'omenacho.png',
+'sergi.png',
+'usman.png',
+'yeray.png',
+'yoandy.png'
+
                     ];
 
           
@@ -71,27 +124,34 @@
                
                // let's add 25 boxes and 25 balls!
                bodyDef.type = b2Body.b2_dynamicBody;
-               for(var i = 0; i < 50; i++)
+               for(var i = 0; i < 65; i++)
                {
                     // both images are 200 x 200 px
                     var randomIndex =   Math.floor(Math.random()*primer.length);
-               var bxBD = new BitmapData("images/primer/" + primer[randomIndex]);
-               var blBD = new BitmapData("images/primer/moha.png");
+               //var bxBD = new BitmapData("images/primer/" + primer[randomIndex]);
+               //var blBD = new BitmapData("images/primer/xinsen2.png");
+                   // var blBD = new BitmapData("images/primer/" + primer[randomIndex]);
+
+                    var blBD = new BitmapData("images/primer/" + primer[i]);
                     var hw = 0.1 + Math.random()*0.45;    // "half width"
-                    var hh = 0.1 + Math.random()*0.45;    // "half height"
+                    //var hh = 0.1 + Math.random()*0.45;    // "half height"
+                    var hh = hw;
                     
-                    bxFixDef.shape.SetAsBox(hw, hh);
+                    //bxFixDef.shape.SetAsBox(hw, hh);
                     blFixDef.shape.SetRadius(hw);
                     
                     bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
                     
                     var body = world.CreateBody(bodyDef);
-                    if(i<25) body.CreateFixture(bxFixDef);    // box
+                    /*if(i<25) body.CreateFixture(bxFixDef);    // box
                     else     body.CreateFixture(blFixDef);    // ball
+
+                    */
+                    body.CreateFixture(blFixDef);    // ball
                     bodies.push(body);
                     
-                    var bm = new Bitmap(i<25 ? bxBD : blBD);  bm.x = bm.y = -100;
-                    //var bm = new Bitmap( blBD);  
+                    //var bm = new Bitmap(i<25 ? bxBD : blBD);  bm.x = bm.y = -100;
+                    var bm = new Bitmap( blBD);  
                     bm.x = bm.y = -100;
                     
                     var actor = new Sprite();  
@@ -99,7 +159,7 @@
                     
                     if(i<25) { actor.scaleX = hw;  actor.scaleY = hh; }
                     else     { actor.scaleX = actor.scaleY = hw;      }
-                    
+                    actor.scaleX = actor.scaleY = hw;  
                     actor.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
                     stage.addChild(actor);
                     actors.push(actor);
