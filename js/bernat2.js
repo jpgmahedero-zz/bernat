@@ -3,11 +3,10 @@
           var bodies = []; // instances of b2Body (from Box2D)
           var actors = []; // instances of Bitmap (from IvanK)
           var up;
-          var fotos = ['abdullah.png',
+          var primer = ['abdullah.png',
 'abraham.png',
 'ahmed.png',
 'ayoub.png',
-'Bernie.png',
 'bilawal.png',
 'camino.png',
 'cristina.png',
@@ -30,7 +29,6 @@
 'ricard.png',
 'seydou.png',
 'shamas.png',
-
 'sufian.png',
 'taimoor.png',
 'umar.png',
@@ -75,16 +73,12 @@
 
 
 var soundID = "Thunder";
- var f1 = new TextFormat("Times new Roman", 45, 0x880099, true, true);
-               
-               var t1 = new TextField();
-              
+
       function preload_sonidos () {
-        createjs.Sound.registerSound("audio/doh.ogg", soundID);
+        createjs.Sound.registerSound("audio/doh_5.ogg", soundID);
       }
 
-      function playSound (event) {
-        console.log(event);
+      function playSound () {
         createjs.Sound.play(soundID);
         console.log('sonido');
       }
@@ -93,20 +87,11 @@ var soundID = "Thunder";
 
                preload_sonidos();
 
-               console.log(fotos.length);
+               console.log(primer.length);
 
                var stage = new Stage("bernies_canvas");
+               stage.addEventListener(Event.ENTER_FRAME, onEF);
                
-
-               
-                t1.selectable = false; // default is true
-               t1.setTextFormat(f1);
-               t1.text = "TextField Class";
-               t1.width = t1.textWidth; t1.height = t1.textHeight;
-               stage.addChild(t1);  t1.x = t1.y = 20;
-
-               stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-
                // background
                //var bg = new Bitmap( new BitmapData("winter2.jpg") );
                var bg = new Bitmap( new BitmapData() );
@@ -122,17 +107,15 @@ var soundID = "Thunder";
                       b2CircleShape   = Box2D.Collision.Shapes.b2CircleShape;
                
                world = new b2World(new b2Vec2(0, 10),  true); 
-               up = new b2Vec2(0, -4); // cuanto reacciona las bola al ratón
+               up = new b2Vec2(0, -30); // cuanto reacciona las bola al ratón
                
                // 1 metro = 100 pixels
                
                var bxFixDef   = new b2FixtureDef();   // box  fixture definition
                bxFixDef.shape = new b2PolygonShape();
-
-               var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-               ballFixDef.shape = new b2CircleShape();
-               
-               bxFixDef.density   = ballFixDef.density = 1;
+               var blFixDef   = new b2FixtureDef();   // ball fixture definition
+               blFixDef.shape = new b2CircleShape();
+               bxFixDef.density   = blFixDef.density = 1;
                
                var bodyDef = new b2BodyDef();
                bodyDef.type = b2Body.b2_staticBody;
@@ -142,67 +125,59 @@ var soundID = "Thunder";
                bodyDef.position.Set(9, stage.stageHeight/100 + 1);
                world.CreateBody(bodyDef).CreateFixture(bxFixDef);
                
-               
-               // left wall
                bxFixDef.shape.SetAsBox(1, 100);
+               // left wall
                bodyDef.position.Set(-1, 3);
                world.CreateBody(bodyDef).CreateFixture(bxFixDef);
-
                // right wall
-               bxFixDef.shape.SetAsBox(1, 100);
                bodyDef.position.Set(stage.stageWidth/100 + 1, 3);
                world.CreateBody(bodyDef).CreateFixture(bxFixDef);
                
                
+               
+               // let's add 25 boxes and 25 balls!
                bodyDef.type = b2Body.b2_dynamicBody;
+               for(var i = 0; i < 65; i++)
+               {
+                    // both images are 200 x 200 px
+                    var randomIndex =   Math.floor(Math.random()*primer.length);
+               //var bxBD = new BitmapData("images/primer/" + primer[randomIndex]);
+               //var blBD = new BitmapData("images/primer/xinsen2.png");
+                   // var blBD = new BitmapData("images/primer/" + primer[randomIndex]);
 
-
-              
-               for(var i = 0; i < 6; i++)     {
+                    var blBD = new BitmapData("images/primer/" + primer[i]);
+                    var hw = 0.1 + Math.random()*0.45;    // "half width"
+                    //var hh = 0.1 + Math.random()*0.45;    // "half height"
+                    var hh = hw;
                     
-
+                    //bxFixDef.shape.SetAsBox(hw, hh);
+                    blFixDef.shape.SetRadius(hw);
                     
-                    // 1. Define a body with position, damping, etc.
                     bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
-                    // 2. Use the world object to create the body.
-                    var body = world.CreateBody(bodyDef);
-
-                    // 3. Define fixtures with a shape, friction, density, etc.
-                    // FUERA DEL BLUCLE. COMPARTIDO POR TODAS LAS INSTANCIAS
-                    // var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-                    //  ballFixDef.shape = new b2CircleShape();               
-                    //  bxFixDef.density   = ballFixDef.density = 1;
-                    //var scale = 0.2 + Math.random()*0.3;    
-                    var scale = 0.5;   
-                    ballFixDef.shape.SetRadius(scale);
                     
-                    // 4.                   Create fixtures on the body.
-                    body.CreateFixture(ballFixDef);    // ball
+                    var body = world.CreateBody(bodyDef);
+                    /*if(i<25) body.CreateFixture(bxFixDef);    // box
+                    else     body.CreateFixture(blFixDef);    // ball
+
+                    */
+                    body.CreateFixture(blFixDef);    // ball
                     bodies.push(body);
                     
+                    //var bm = new Bitmap(i<25 ? bxBD : blBD);  bm.x = bm.y = -100;
+                    var bm = new Bitmap( blBD);  
+                    bm.x = bm.y = -100;
                     
-                    // PARTE DE LA LIBRERIA IVANK 
-                    var nomFoto =  fotos[i]; // incluir cada foto 1 vez
-                    var bitmapData = new BitmapData("images/" + nomFoto);
-                    var bitmap = new Bitmap( bitmapData);  
-                    bitmap.x = bitmap.y = -134;
-                    bitmap.name = nomFoto;
+                    var actor = new Sprite();  
+                    actor.addChild(bm);
                     
-                    
-                    var actor = new Sprite(); 
-                    actor.scaleX = actor.scaleY =0.3 + Math.random()*0.7;    // "half width"
-                    if (nomFoto == 'Bernie.png')
-                      actor.scaleX = actor.scaleY = 0.8;    // "half width"
-                    actor.addChild(bitmap);
-                    
+                    if(i<25) { actor.scaleX = hw;  actor.scaleY = hh; }
+                    else     { actor.scaleX = actor.scaleY = hw;      }
+                    actor.scaleX = actor.scaleY = hw;  
                     actor.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
-                    //bitmap.addEventListener(MouseEvent.CLICK, playSound);  
-                   
-                    if (nomFoto === 'Bernie.png'){
-                      bitmap.addEventListener(MouseEvent.CLICK, playSound);  
-                      console.log("bitmap.addEventListener(MouseEvent.CLICK, playSound);  ");
+                    if (i<30){
+                         console.log('asdad');
+                         actor.addEventListener(MouseEvent.CLICK, function(){ console.log('asdad')});  
                     }
-                    
                     stage.addChild(actor);
                     actors.push(actor);
 
@@ -224,6 +199,11 @@ b2Body* body = world.CreateBody(&bodyDef);
                bodyDefChef.position.Set(0,0);
 
                var bodyChef = world.CreateBody(bodyDef);
+
+               var fixDefChef   = new b2FixtureDef();   // box  fixture definition
+               bxFixDefChef.density = 1;
+               fixDefChef.shape = new b2PolygonShape();
+
                
 
 
@@ -231,7 +211,7 @@ b2Body* body = world.CreateBody(&bodyDef);
 
           }
           
-          function onEnterFrame(e) 
+          function onEF(e) 
           {
                world.Step(1 / 60,  3,  3);
                world.ClearForces();
@@ -245,7 +225,6 @@ b2Body* body = world.CreateBody(&bodyDef);
                     actor.y = p.y *100;
                     actor.rotation = body.GetAngle()*180/Math.PI;
                }
-               t1.x += 1;
           }
           
           function Jump(e)
@@ -253,16 +232,7 @@ b2Body* body = world.CreateBody(&bodyDef);
                var a = e.currentTarget;  // current actor
                var i = actors.indexOf(a);
                //  cursor might be over ball bitmap, but not over a real ball
-               //if (i>=65 && Math.sqrt(a.mouseX*a.mouseX + a.mouseY*a.mouseY) > 10) 
-                //return;
+               if(i>=25 && Math.sqrt(a.mouseX*a.mouseX + a.mouseY*a.mouseY) > 100) return;
                bodies[i].ApplyImpulse(up, bodies[i].GetWorldCenter());
           }
-/*
-          applyImpulse = function(bodyId, degrees, power) {
-    var body = this.bodiesMap[bodyId];
-    body.ApplyImpulse(new b2Vec2(Math.cos(degrees * (Math.PI / 180)) * power,
-                                 Math.sin(degrees * (Math.PI / 180)) * power),
-                                 body.GetWorldCenter());
-
-}*/
      
