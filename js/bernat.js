@@ -11,8 +11,10 @@ var world;
 var bodies = []; // instances of b2Body (from Box2D)
 var actors = []; // instances of Bitmap (from IvanK)
 var up;
-var fotos = [ 
-'cannon.png',
+var act = []; 
+var stage;
+var images = [ 
+
 'abdullah.png',
               'abraham.png',
               'ahmed.png',
@@ -83,15 +85,16 @@ var fotos = [
 
               ];
 
-var l, r, u, d, speed=1, angle=1;
-var cannonBody, cannonActor;
+var l=false, r=false, u, d, speed=1, angle=0;
+var cannon={};
+var estadoCannon='parado';
 
 var soundID = "Thunder";
                 
               
-      function preload_sonidos () {
-        createjs.Sound.registerSound("audio/doh.ogg", soundID);
-      }
+function preload_sonidos () {
+    createjs.Sound.registerSound("audio/doh.ogg", soundID);
+}
 
       function playSound (event) {
         console.log(event);
@@ -101,148 +104,153 @@ var soundID = "Thunder";
           
 function init() {   
 
-  preload_sonidos();
-
-  console.log(fotos.length);
-
-  var stage = new Stage("bernies_canvas");
-  var texto = crearTexto();
-  stage.addChild(texto);  
-
-  
-  stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-
-  // background
-  //var bg = new Bitmap( new BitmapData("winter2.jpg") );
-  var bg = new Bitmap( new BitmapData() );
-  bg.scaleX = bg.scaleY = stage.stageHeight/512;
-  stage.addChild(bg);
-  stage.addEventListener(KeyboardEvent.KEY_DOWN, onKD);
-  stage.addEventListener(KeyboardEvent.KEY_UP  , onKU);
+    preload_sonidos();
 
 
-  world = new b2World(new b2Vec2(0, 10),  true); 
-  up = new b2Vec2(0, -4); // cuanto reacciona las bola al ratón
+    stage = new Stage("bernies_canvas");
+    var texto = crearTexto();
+    stage.addChild(texto);  
 
-  // 1 metro = 100 pixels
+    
+    stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+    stage.addEventListener(KeyboardEvent.KEY_DOWN, onKEY_DOWN);
+    stage.addEventListener(KeyboardEvent.KEY_UP  , onKEY_UP);
 
-  var bxFixDef   = new b2FixtureDef();   // box  fixture definition
-  bxFixDef.shape = new b2PolygonShape();
+    world = new b2World(new b2Vec2(0, 10),  true); 
+    up = new b2Vec2(0, -4); // cuanto reacciona las bola al ratón
 
-  var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-  ballFixDef.shape = new b2CircleShape();
+    crearFondo();  
 
-  bxFixDef.density   = ballFixDef.density = 1;
+    var options = {};
+    for(var i = 0; i < 1; i++)     {
 
-  var bodyDef = new b2BodyDef();
-  bodyDef.type = b2Body.b2_staticBody;
+        options={shape:'ball', scale:0.5,width:269,height:269,random:true};
+        alumno = crearActor(images[i],options);
+        stage.addChild(alumno.sprite);
+        actors.push(alumno);
 
-  // create ground
-  bxFixDef.shape.SetAsBox(10, 1);
-  bodyDef.position.Set(9, stage.stageHeight/100 + 1);
-  world.CreateBody(bodyDef).CreateFixture(bxFixDef);
-
-
-  // left wall
-  bxFixDef.shape.SetAsBox(1, 100);
-  bodyDef.position.Set(-1, 3);
-  world.CreateBody(bodyDef).CreateFixture(bxFixDef);
-
-  // right wall
-  bxFixDef.shape.SetAsBox(1, 100);
-  bodyDef.position.Set(stage.stageWidth/100 + 1, 3);
-  world.CreateBody(bodyDef).CreateFixture(bxFixDef);
-
-
-  bodyDef.type = b2Body.b2_dynamicBody;
-
-
-  for(var i = 0; i < 1; i++)     {
-
-    crearFoto(stage,fotos[i]);
-
-  }
-  
- cannonBody = crearCanon(stage);
-  
+    }
+    options={shape:'box', scale:0.5,width:200,height:269,random:false, position:{x:1,y:1}};
+    cannon = crearActor('cannon.png',options);
+    stage.addChild(cannon.sprite);
+    actors.push(cannon);
+    
 }
 
+function crearActor(image, options){
 
+  var bodyDef = new b2BodyDef();
+  bodyDef.type = b2Body.b2_dynamicBody;
+
+  var fixtureDef = new b2FixtureDef();   
+
+  if (options.shape == 'ball'){
+    fixtureDef.shape = new b2CircleShape();
+    fixtureDef.shape.SetRadius(options.scale);
+  }else{
+    fixtureDef.shape = new b2PolygonShape();
+    fixtureDef.shape.SetAsBox(1,1);
+  }
+
+  if (options.random == true){
+    bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
+  }else{
+    bodyDef.position.Set(options.position.x, options.position.y);
+    //bodyDef.position.Set(1,1);
+  }
+    var body = world.CreateBody(bodyDef);
+    body.CreateFixture(fixtureDef);    // ball
+
+  var bitmapData = new BitmapData("images/" + image);
+  var bitmap = new Bitmap( bitmapData);  
+  bitmap.x = -options.width/2;
+  bitmap.y = -options.height/2;
+  
+
+    var sprite = new Sprite(); 
+    //sprite.scaleX = sprite.scaleY = 0.3 + Math.random()*0.7;    // "half width"
+    sprite.scaleX = sprite.scaleY = 1;    // "half width"
+    sprite.addChild(bitmap);
+    sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
+    
+   
+    var actor={};
+
+    actor.body = body;
+    actor.sprite =  sprite;
+    actor.sprite.body = body;
+
+   
+    return actor;
+
+
+
+}
   
   function onEnterFrame(e) {
-       world.Step(1 / 60,  3,  3);
-       world.ClearForces();
-       
-       //speed *= 0.9;
-       if(u) speed += 1+speed*0.06;
-       if(d) speed -= 1;
-       
-       //if(r) angle += speed * 0.003;
-       //if(l) angle -= speed * 0.003;
+      world.Step(1 / 60,  3,  3);
+      world.ClearForces();
 
-       if(r) angle += 1;
-       if(l) angle -= 1;
-
-       var angulo = angle*180/Math.PI;
-       //cannon.rotation = angulo;
-       //cannon.rotation +=1;// angulo;
-       //cannon.rotation = cannon.actor.rotation =10;// angulo;
-       //cannon.actor.rotation +=1;// angulo;
+      if(u) speed += 1;
+      if(d) speed -= 1;
+      
+      if(r) angle += 0.03;
+      if(l) angle -= 0.03;
+          
+      
        
-       console.log("angle:"+angle);
-       console.log("speed:"+speed);
        
-       p = cannonBody.GetPosition();
-       cannonActor.x = p.x*100;
-       cannonActor.y = p.y*100;
-       cannonActor.rotation = angulo*180/Math.PI;
+      for(var i=0; i<actors.length; i++){
 
+          var body  = actors[i].body;
+          var sprite = actors[i].sprite;
+          var p = body.GetPosition();
+          sprite.x = p.x *100;   // updating sprite
+          sprite.y = p.y *100;
+          sprite.rotation = body.GetAngle()*180/Math.PI;
+      }
 
-       for(var i=0; i<actors.length; i++)
-       {
-            var body  = bodies[i];
-            var actor = actors [i];
-            var p = body.GetPosition();
-            actor.x = p.x *100;   // updating actor
-            actor.y = p.y *100;
-            actor.rotation = body.GetAngle()*180/Math.PI;
-       }
-       //t1.x += 1;
+      cannon.body.rotation = cannon.sprite.rotation = angle*180/Math.PI;
        
   }
          
- function onKD (e)
-          {
-               //console.log(e.keyCode)
-               if(e.keyCode == 37) l = true;               
-               if(e.keyCode == 38) u = true;
-               if(e.keyCode == 39) r = true;
-               if(e.keyCode == 40) d = true;
-          }
+function onKEY_DOWN (e)          {
+    console.log(e.keyCode)
+    if(e.keyCode == 37) l = true;               
+    if(e.keyCode == 38) u = true;
+    if(e.keyCode == 39) r = true;
+    if(e.keyCode == 40) d = true;
+    if(e.keyCode == 32) {
+      KEY_SPACE = true;
+      dispara();
+    }
+}
           
-          function onKU (e)
-          {
-               if(e.keyCode == 37) l = false;
-               if(e.keyCode == 38) u = false;
-               if(e.keyCode == 39) r = false;
-               if(e.keyCode == 40) d = false;
-          }
+function onKEY_UP (e){
+    if(e.keyCode == 37) l = false;
+    if(e.keyCode == 38) u = false;
+    if(e.keyCode == 39) r = false;
+    if(e.keyCode == 40) d = false;
+    if(e.keyCode == 40) KEY_SPACE = false;
+}
 
       function onEnterFrameT1(e) 
           {
                var texto = e.target;
-               texto.x += 2;
+               //texto.x += 2;
+               texto.text = speed;
           }
 
           function Jump(e)
           {
-               var a = e.currentTarget;  // current actor
+               var sprite = e.currentTarget;  // current sprite
                
-               var i = actors.indexOf(a);
+              // var actor = actors.indexOf(i);
                //  cursor might be over ball bitmap, but not over a real ball
                //if (i>=65 && Math.sqrt(a.mouseX*a.mouseX + a.mouseY*a.mouseY) > 10) 
                 //return;
-               bodies[i].ApplyImpulse(up, bodies[i].GetWorldCenter());
+
+               sprite.body.ApplyImpulse(up, sprite.body.GetWorldCenter());
           }
 
 function crearTexto(){
@@ -256,7 +264,7 @@ function crearTexto(){
   t1.text = "Bernie's 110010's";
   t1.width = t1.textWidth; 
   t1.height = t1.textHeight;
-  t1.x = t1.y = 20;
+  t1.x = t1.y = 309;
   t1.addEventListener(Event.ENTER_FRAME, onEnterFrameT1);
 
   return t1;
@@ -265,117 +273,7 @@ function crearTexto(){
 }
 
 
-function crearFoto(stage, nomFoto){
 
-  var bodyDef = new b2BodyDef();
-  bodyDef.type = b2Body.b2_dynamicBody;
-
-  var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-  ballFixDef.shape = new b2CircleShape();
-
-  // 1. Define a body with position, damping, etc.
-    bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
-
-    // 2. Use the world object to create the body.
-    var body = world.CreateBody(bodyDef);
-
-    // 3. Define fixtures with a shape, friction, density, etc.
-    // FUERA DEL BLUCLE. COMPARTIDO POR TODAS LAS INSTANCIAS
-    // var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-    //  ballFixDef.shape = new b2CircleShape();               
-    //  bxFixDef.density   = ballFixDef.density = 1;
-    //var scale = 0.2 + Math.random()*0.3;    
-    var scale = 0.5;   
-    ballFixDef.shape.SetRadius(scale);
-
-    // 4.                   Create fixtures on the body.
-    body.CreateFixture(ballFixDef);    // ball
-    bodies.push(body);
-
-
-    // PARTE DE LA LIBRERIA IVANK 
-    //var nomFoto =  fotos[2]; // incluir cada foto 1 vez
-    var bitmapData = new BitmapData("images/" + nomFoto);
-    var bitmap = new Bitmap( bitmapData);  
-    bitmap.x = bitmap.y = -134;
-    bitmap.name = nomFoto;
-
-
-    var actor = new Sprite(); 
-    actor.scaleX = actor.scaleY =0.3 + Math.random()*0.7;    // "half width"
-    if (nomFoto == 'Bernie.png')
-      actor.scaleX = actor.scaleY = 0.8;    // "half width"
-    actor.addChild(bitmap);
-
-    actor.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
-    //bitmap.addEventListener(MouseEvent.CLICK, playSound);  
-
-    if (nomFoto === 'Bernie.png'){
-      bitmap.addEventListener(MouseEvent.CLICK, playSound);  
-      console.log("bitmap.addEventListener(MouseEvent.CLICK, playSound);  ");
-    }
-
-    stage.addChild(actor);
-    actors.push(actor);
-
-
-    cannonActor = actor;
-    cannonBody = body;
-
-
-
-}
-
-function crearCanon(stage){
-
-
-  var bodyDef = new b2BodyDef();
-  bodyDef.type = b2Body.b2_dynamicBody;
-
-  var ballFixDef   = new b2FixtureDef();   // ball fixture definition
-
-  ballFixDef.shape = new b2PolygonShape();
-
-  // 1. Define a body with position, damping, etc.
-    bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
-    bodyDef.position.Set(10,0);
-    // 2. Use the world object to create the body.
-    var body = world.CreateBody(bodyDef);
-
-    var scale = 0.5;   
-     ballFixDef.shape.SetAsBox(1,1);
-    //ballFixDef.shape.SetRadius(0.5);
-
-    // 4.                   Create fixtures on the body.
-    body.CreateFixture(ballFixDef);    // ball
-    bodies.push(body);
-
-
-    // PARTE DE LA LIBRERIA IVANK 
-    //var nomFoto =  fotos[2]; // incluir cada foto 1 vez
-    var bitmapData = new BitmapData("images/cannon.png");
-    var bitmap = new Bitmap( bitmapData);  
-    bitmap.x = -134;
-    bitmap.y = -269;
-    bitmap.name = 'cannon';
-
-
-    var actor = new Sprite(); 
-    actor.scaleX = actor.scaleY = 1;
-    actor.addChild(bitmap);
-    actor.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
-    //actor.rotation=10;
-
-
-    stage.addChild(actor);
-    actors.push(actor);
-
-    
-
-return body;
-
-
-}
 
 function debugDraw(){
 
@@ -387,12 +285,66 @@ debugDraw.SetLineThickness(1.0);
 debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 world.SetDebugDraw(debugDraw)
 }
-/*
-          applyImpulse = function(bodyId, degrees, power) {
-    var body = this.bodiesMap[bodyId];
-    body.ApplyImpulse(new b2Vec2(Math.cos(degrees * (Math.PI / 180)) * power,
-                                 Math.sin(degrees * (Math.PI / 180)) * power),
-                                 body.GetWorldCenter());
 
-}*/
+function dispara(){
+
+    var foto ='yoandy.png';
+    var bola = crearAlumno('yoandy');
+    //cannon.body.SetPosition(2,1);
+    
+    bola.body.SetPositionAndAngle(new b2Vec2(1,1),0);
+    
+    
+
+    
+    var p = bola.body.GetPosition();
+
+
+    bola.sprite.x = p.x *100;   // updating sprite
+    bola.sprite.y = p.y *100;
+    bola.sprite.rotation = bola.body.GetAngle()*180/Math.PI;
+
+
+  stage.addChild(bola.sprite);
+  actors.push(bola);
+
+
+
+}
+
+
+function crearFondo(){
+  // background
+    //var bg = new Bitmap( new BitmapData("winter2.jpg") );
+    var bg = new Bitmap( new BitmapData() );
+    bg.scaleX = bg.scaleY = stage.stageHeight/512;
+    stage.addChild(bg);
+
+
+   
+    // 1 metro = 100 pixels
+
+    var bxFixDef   = new b2FixtureDef();   // box  fixture definition
+    bxFixDef.shape = new b2PolygonShape();    
+    bxFixDef.density  = 1;
+
+    var bodyDef = new b2BodyDef();
+    bodyDef.type = b2Body.b2_staticBody;
+
+    // create ground
+    bxFixDef.shape.SetAsBox(10, 1);
+    bodyDef.position.Set(9, stage.stageHeight/100 + 1);
+    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+
+    // left wall
+    bxFixDef.shape.SetAsBox(1, 100);
+    bodyDef.position.Set(-1, 3);
+    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+    // right wall
+    bxFixDef.shape.SetAsBox(1, 100);
+    bodyDef.position.Set(stage.stageWidth/100 + 1, 3);
+    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+}
      
