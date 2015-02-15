@@ -89,27 +89,39 @@ var KEY_LEFT=false, KEY_RIGHT=false, KEY_UP=false, KEY_DOWN=false, speed=1, angl
 var bernie={};
 var estadoCannon='parado';
 
-var soundID = "Thunder";
+var doh = "doh";
+var doh32 = "doh32";
                 
               
-function preload_sonidos () {
-    createjs.Sound.registerSound("audio/doh.ogg", soundID);
+function preload_doh () {
+    createjs.Sound.registerSound("audio/doh.ogg", doh);
+ 
 }
 
-      function playSound (event) {
-        console.log(event);
-        createjs.Sound.play(soundID);
-        console.log('sonido');
-      }
+function preload_doh32 () {
+ 
+    createjs.Sound.registerSound("audio/doh32.wav", doh32);
+}
+function playSoundDoh (sound) {
+        
+        createjs.Sound.play(doh);
+        
+}
+
+function playSoundDoh32 (sound) {
+        
+        createjs.Sound.play(doh32);
+        
+}
           
 function init() {   
 
-    preload_sonidos();
+    preload_doh();
 
 
     stage = new Stage("bernies_canvas");
-    var texto = crearTexto();
-    stage.addChild(texto);  
+    
+    
 
     
     stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
@@ -123,28 +135,54 @@ function init() {
     up = new b2Vec2(0, -4); // cuanto reacciona las bola al ratón
 
     crearFondo();  
+    // pause 3s
+    crearBernie();
+    crearTextoIntro1(); // "Hi ha coses ala vida..."
+    // pausa 10s
+    crearTextoIntro2();// "...que son evitables"
 
+    crearAlumnos();
+/*
+    crearTextoPiano(); // " D'altres no tant..."
+    crearPiano();
+    // pausa 3s
+    crearTextoYoandy(); // " D'altres son impossible!!"
+    dispararYoandys();
+
+    // pausa 3s
+    crearTextoFelitats1(); // " Altres tambe son invenitables pero mes agradables"
+    // pausa 3s
+    crearTextoFelitats2(); // " Felicitats 110010s"
+    crearSSD();
+    */
+
+
+                  
+    
+}
+
+function crearBernie(){
     var options = {};
-     options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:5}};
+    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:0}};
     bernie = crearActor('Bernie.png',options);
     stage.addChild(bernie.sprite);
     actors.push(bernie);  
 
-    bernie.sprite.addEventListener(MouseEvent.CLICK,playSound);  
-    for(var i = 0; i < 30; i++)     {
+    bernie.sprite.addEventListener(MouseEvent.CLICK,playSoundDoh);  
 
-        options={shape:'ball', scale:0.5,width:269,height:269,random:true};
-        alumno = crearActor(images[i],options);
-        stage.addChild(alumno.sprite);
-        actors.push(alumno);
-
-    }
-   
-   
-
-              
-    
 }
+function crearAlumnos(){
+
+  // pausa 1s cada alumno
+  for(var i = 0; i < 40; i++)     {
+
+      options={shape:'ball', scale:0.5,width:269,height:269,random:true};
+      alumno = crearActor(images[i],options);
+      stage.addChild(alumno.sprite);
+      actors.push(alumno);
+  }
+}
+
 
 function crearActor(image, options){
 
@@ -156,6 +194,9 @@ function crearActor(image, options){
   if (options.shape == 'ball'){
     fixtureDef.shape = new b2CircleShape();
     fixtureDef.shape.SetRadius(options.scale);
+    fixtureDef.restitution = 1;
+    fixtureDef.friction = 0.3
+    fixtureDef.density = 1
   }else{
     fixtureDef.shape = new b2PolygonShape();
     fixtureDef.shape.SetAsBox(1,1);
@@ -163,6 +204,11 @@ function crearActor(image, options){
 
   if (options.random == true){
     bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
+    //Math.random() * (max - min) + min;
+   // bodyDef.angle = Math.random() * (2*Math.PI - 0) + 0;
+    bodyDef.angle = Math.random() * Math.PI * 2;
+    bodyDef.angle = 0;
+
   }else{
     bodyDef.position.Set(options.position.x, options.position.y);
     //bodyDef.position.Set(1,1);
@@ -180,6 +226,7 @@ function crearActor(image, options){
     //sprite.scaleX = sprite.scaleY = 0.3 + Math.random()*0.7;    // "half width"
     sprite.scaleX = sprite.scaleY = options.scale;    // "half width"
     sprite.addChild(bitmap);
+    sprite.rotation = body.GetAngle()*180 / Math.PI;
     //sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
 
     
@@ -212,7 +259,7 @@ function setUpCollisions(world){
       }
 
       if (bodyA.nombre =='Bernie.png' || bodyB.nombre == 'Bernie.png'){
-        playSound();
+        playSoundDoh();
       }
         
       
@@ -236,31 +283,32 @@ function setUpCollisions(world){
       world.ClearForces();
 
           
+      // eliminar de la lista de cuerpos de Box2D y su correspondiente Sprite
       for (var i in destroy_list) {
         var body = destroy_list[i];
         stage.removeChild(body.sprite);
         world.DestroyBody(body);
 
       }
-    
+      // resetear la lista de
       destroy_list=[];
        
 
-  var vel = bernie.body.GetLinearVelocity(); // vel = body->GetLinearVelocity();
-  var force = 0;
-  if(KEY_LEFT){
-    if (vel.x>-5) force=-50;
-  }else
-  if(KEY_RIGHT) {
-      if (vel.x<5) force=50;
-  }else{
-    force=vel.x*-10;
-  }
-      
-    bernie.body.ApplyForce(new b2Vec2(force,0), bernie.body.GetWorldCenter());
-    //body->ApplyForce( b2Vec2(force,0), body->GetWorldCenter() );
+      var vel = bernie.body.GetLinearVelocity(); // vel = body->GetLinearVelocity();
+      var force = 0;
+      if(KEY_LEFT){
+        if (vel.x>-5) force=-50;
+      }else
+      if(KEY_RIGHT) {
+        if (vel.x<5) force=50;
+      }else{
+        force=vel.x*-10;
+      }
+        
+      bernie.body.ApplyForce(new b2Vec2(force,0), bernie.body.GetWorldCenter());
+      //body->ApplyForce( b2Vec2(force,0), body->GetWorldCenter() );
 
-       
+     
       for(var i=0; i<actors.length; i++){
 
           var body  = actors[i].body;
@@ -269,6 +317,7 @@ function setUpCollisions(world){
           sprite.x = p.x *100;   // updating sprite
           sprite.y = p.y *100;
           sprite.rotation = body.GetAngle()*180/Math.PI;
+          console.log("sprite.rotation:"+ sprite.rotation+" body.GetAngle():"+body.GetAngle() );
       }
       //bernie.body.x =bernie.sprite.x +=speed;
       //bernie.body.rotation = bernie.sprite.rotation = angle*180/Math.PI;
@@ -295,26 +344,14 @@ function onKEY_UP (e){
     if(e.keyCode == 40) KEY_SPACE = false;
 }
 
-      function onEnterFrameText(e) 
-          {
-               var texto = e.target;
-               texto.x += 2;
-               
-          }
+function onEnterFrameText(e)     {
+         var texto = e.target;
+         texto.x += 2;         
+    }
 
-          function Jump(e)
-          {
-               var sprite = e.currentTarget;  // current sprite
-               
-              // var actor = actors.indexOf(i);
-               //  cursor might be over ball bitmap, but not over a real ball
-               //if (i>=65 && Math.sqrt(a.mouseX*a.mouseX + a.mouseY*a.mouseY) > 10) 
-                //return;
+     
 
-               sprite.body.ApplyImpulse(up, sprite.body.GetWorldCenter());
-          }
-
-function crearTexto(){
+function crearTextoIntro1(){
   var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
    
   var t1;
@@ -322,15 +359,48 @@ function crearTexto(){
   t1   = new TextField();
   t1.selectable = false; // default is true
   t1.setTextFormat(f1);
-  t1.text = "Hi ha coses a la vida que són evitables....";
-  t1.width = t1.textWidth/2; 
+  t1.text = "Hi ha coses a la vida...";
+  t1.width = t1.textWidth; 
   t1.height = t1.textHeight;
   t1.x =0;
-  t1.y = 309;
+  t1.y = 100;
+  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(t1);
+}
+
+
+function crearTextoIntro2(){
+  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+   
+  var t1;
+  
+  t1   = new TextField();
+  t1.selectable = false; // default is true
+  t1.setTextFormat(f1);
+  t1.text = "... que son evitables";
+  t1.width = t1.textWidth+10; 
+  t1.height = t1.textHeight;
+  t1.x =100;
+  t1.y = 200;
+  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(t1);
+
+  f1 = new TextFormat("Times new Roman", 20, 0x880099, true, true);
+   
+  
+  
+  t1   = new TextField();
+  t1.selectable = false; // default is true
+  t1.setTextFormat(f1);
+  t1.text = "fes servir els cursors";
+  t1.width = t1.textWidth+10; 
+  t1.height = t1.textHeight;
+  t1.x =200;
+  t1.y = 280;
   t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
 
 
-  return t1;
+  stage.addChild(t1);
  
 
 }
