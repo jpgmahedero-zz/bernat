@@ -12,6 +12,7 @@ var bodies = []; // instances of b2Body (from Box2D)
 var actors = []; // instances of Bitmap (from IvanK)
 var up;
 var act = []; 
+var destroy_list=[];
 var stage;
 var images = [ 
 
@@ -115,7 +116,7 @@ function init() {
     stage.addEventListener(KeyboardEvent.KEY_DOWN, onKEY_DOWN);
     stage.addEventListener(KeyboardEvent.KEY_UP  , onKEY_UP);
 
-    world = new b2World(new b2Vec2(0, 10),  true); 
+    world = new b2World(new b2Vec2(0, 2),  true); 
     setUpCollisions(world);
 
 
@@ -124,7 +125,13 @@ function init() {
     crearFondo();  
 
     var options = {};
-    for(var i = 0; i < 1; i++)     {
+     options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:5}};
+    bernie = crearActor('Bernie.png',options);
+    stage.addChild(bernie.sprite);
+    actors.push(bernie);  
+
+    bernie.sprite.addEventListener(MouseEvent.CLICK,playSound);  
+    for(var i = 0; i < 30; i++)     {
 
         options={shape:'ball', scale:0.5,width:269,height:269,random:true};
         alumno = crearActor(images[i],options);
@@ -133,12 +140,7 @@ function init() {
 
     }
    
-    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:1}};
-    bernie = crearActor('Bernie.png',options);
-    stage.addChild(bernie.sprite);
-    actors.push(bernie);  
-
-    bernie.sprite.addEventListener(MouseEvent.CLICK,playSound);  
+   
 
               
     
@@ -178,15 +180,18 @@ function crearActor(image, options){
     //sprite.scaleX = sprite.scaleY = 0.3 + Math.random()*0.7;    // "half width"
     sprite.scaleX = sprite.scaleY = options.scale;    // "half width"
     sprite.addChild(bitmap);
-    sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
+    //sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
 
     
    
     var actor={};
 
+    body.nombre = image;
+    body.sprite = sprite;
+
     actor.body = body;
     actor.sprite =  sprite;
-    actor.sprite.body = body;
+    
 
    
     return actor;
@@ -198,8 +203,20 @@ function crearActor(image, options){
 function setUpCollisions(world){
   var listener = new Box2D.Dynamics.b2ContactListener;
     listener.BeginContact = function(contact) {
-      console.log(contact);
-        console.log(contact.GetFixtureA().GetBody().GetUserData());
+      var bodyA = contact.GetFixtureA().GetBody();
+      var bodyB = contact.GetFixtureB().GetBody();
+
+      //console.log(bodyA.nombre + " <---> " + bodyB.nombre);
+      if (bodyA.nombre =='suelo' && bodyA.nombre != 'Bernie.png'){
+        destroy_list.push(bodyB);
+      }
+
+      if (bodyA.nombre =='Bernie.png' || bodyB.nombre == 'Bernie.png'){
+        playSound();
+      }
+        
+      
+
     }
     listener.EndContact = function(contact) {
         // console.log(contact.GetFixtureA().GetBody().GetUserData());
@@ -219,7 +236,14 @@ function setUpCollisions(world){
       world.ClearForces();
 
           
-      
+      for (var i in destroy_list) {
+        var body = destroy_list[i];
+        stage.removeChild(body.sprite);
+        world.DestroyBody(body);
+
+      }
+    
+      destroy_list=[];
        
 
   var vel = bernie.body.GetLinearVelocity(); // vel = body->GetLinearVelocity();
@@ -233,12 +257,6 @@ function setUpCollisions(world){
     force=vel.x*-10;
   }
       
-    /*switch ( moveState )
-    {
-      case MS_LEFT:  if ( vel.x > -5 ) force = -50;  break;
-      case MS_STOP:  force = vel.x * -10; break;
-      case MS_RIGHT: if ( vel.x <  5 ) force =  50; break;
-    }*/
     bernie.body.ApplyForce(new b2Vec2(force,0), bernie.body.GetWorldCenter());
     //body->ApplyForce( b2Vec2(force,0), body->GetWorldCenter() );
 
@@ -280,8 +298,8 @@ function onKEY_UP (e){
       function onEnterFrameText(e) 
           {
                var texto = e.target;
-               //texto.x += 2;
-               texto.text = speed;
+               texto.x += 2;
+               
           }
 
           function Jump(e)
@@ -297,7 +315,7 @@ function onKEY_UP (e){
           }
 
 function crearTexto(){
-  var f1 = new TextFormat("Times new Roman", 45, 0x880099, true, true);
+  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
    
   var t1;
   
@@ -305,10 +323,12 @@ function crearTexto(){
   t1.selectable = false; // default is true
   t1.setTextFormat(f1);
   t1.text = "Hi ha coses a la vida que són evitables....";
-  t1.width = t1.textWidth; 
+  t1.width = t1.textWidth/2; 
   t1.height = t1.textHeight;
-  t1.x = t1.y = 309;
+  t1.x =0;
+  t1.y = 309;
   t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+
 
   return t1;
  
@@ -320,7 +340,9 @@ function crearTexto(){
 
 
 
-function dispara(){
+function disparaYoandys(){
+
+  /* NP VALE, HAY QUE REHACER TODO */
 
     var foto ='yoandy.png';
     
@@ -356,7 +378,7 @@ function dispara(){
       console.log('x:'+ x +  '  y:'+y);
       bola.sprite.body.ApplyImpulse(new b2Vec2( x*10,y), bola.sprite.body.GetWorldCenter())
       
-      console.log("eeeee2");
+      
       
     });  
    
@@ -386,17 +408,23 @@ function crearFondo(){
     // create ground
     bxFixDef.shape.SetAsBox(10, 1);
     bodyDef.position.Set(9, stage.stageHeight/100 + 1);
-    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+    var bodyGround = world.CreateBody(bodyDef);
+    bodyGround.nombre = 'suelo';
+    bodyGround.CreateFixture(bxFixDef);
 
 
     // left wall
     bxFixDef.shape.SetAsBox(1, 100);
     bodyDef.position.Set(-1, 3);
-    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+    var bodyleft = world.CreateBody(bodyDef);
+    bodyleft.nombre = 'left';
+    bodyleft.CreateFixture(bxFixDef);
 
     // right wall
     bxFixDef.shape.SetAsBox(1, 100);
     bodyDef.position.Set(stage.stageWidth/100 + 1, 3);
-    world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+    var bodyRight = world.CreateBody(bodyDef)
+    bodyRight.nombre ='right';
+    bodyRight.CreateFixture(bxFixDef);
 }
      
