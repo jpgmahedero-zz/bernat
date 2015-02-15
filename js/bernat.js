@@ -19,7 +19,6 @@ var images = [
               'abraham.png',
               'ahmed.png',
               'ayoub.png',
-              'Bernie.png',
               'bilawal.png',
               'camino.png',
               'cristina.png',
@@ -85,8 +84,8 @@ var images = [
 
               ];
 
-var l=false, r=false, u, d, speed=1, angle=0;
-var cannon={};
+var KEY_LEFT=false, KEY_RIGHT=false, KEY_UP=false, KEY_DOWN=false, speed=1, angle=0;
+var bernie={};
 var estadoCannon='parado';
 
 var soundID = "Thunder";
@@ -117,6 +116,9 @@ function init() {
     stage.addEventListener(KeyboardEvent.KEY_UP  , onKEY_UP);
 
     world = new b2World(new b2Vec2(0, 10),  true); 
+    setUpCollisions(world);
+
+
     up = new b2Vec2(0, -4); // cuanto reacciona las bola al ratón
 
     crearFondo();  
@@ -130,10 +132,15 @@ function init() {
         actors.push(alumno);
 
     }
-    options={shape:'box', scale:0.5,width:200,height:269,random:false, position:{x:1,y:1}};
-    cannon = crearActor('cannon.png',options);
-    stage.addChild(cannon.sprite);
-    actors.push(cannon);
+   
+    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:1}};
+    bernie = crearActor('Bernie.png',options);
+    stage.addChild(bernie.sprite);
+    actors.push(bernie);  
+
+    bernie.sprite.addEventListener(MouseEvent.CLICK,playSound);  
+
+              
     
 }
 
@@ -169,9 +176,10 @@ function crearActor(image, options){
 
     var sprite = new Sprite(); 
     //sprite.scaleX = sprite.scaleY = 0.3 + Math.random()*0.7;    // "half width"
-    sprite.scaleX = sprite.scaleY = 1;    // "half width"
+    sprite.scaleX = sprite.scaleY = options.scale;    // "half width"
     sprite.addChild(bitmap);
     sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
+
     
    
     var actor={};
@@ -186,19 +194,54 @@ function crearActor(image, options){
 
 
 }
+
+function setUpCollisions(world){
+  var listener = new Box2D.Dynamics.b2ContactListener;
+    listener.BeginContact = function(contact) {
+      console.log(contact);
+        console.log(contact.GetFixtureA().GetBody().GetUserData());
+    }
+    listener.EndContact = function(contact) {
+        // console.log(contact.GetFixtureA().GetBody().GetUserData());
+    }
+    listener.PostSolve = function(contact, impulse) {
+        
+    }
+    listener.PreSolve = function(contact, oldManifold) {
+
+    }
+    world.SetContactListener(listener);
+
+}
   
   function onEnterFrame(e) {
       world.Step(1 / 60,  3,  3);
       world.ClearForces();
 
-      if(u) speed += 1;
-      if(d) speed -= 1;
-      
-      if(r) angle += 0.03;
-      if(l) angle -= 0.03;
           
       
        
+
+  var vel = bernie.body.GetLinearVelocity(); // vel = body->GetLinearVelocity();
+  var force = 0;
+  if(KEY_LEFT){
+    if (vel.x>-5) force=-50;
+  }else
+  if(KEY_RIGHT) {
+      if (vel.x<5) force=50;
+  }else{
+    force=vel.x*-10;
+  }
+      
+    /*switch ( moveState )
+    {
+      case MS_LEFT:  if ( vel.x > -5 ) force = -50;  break;
+      case MS_STOP:  force = vel.x * -10; break;
+      case MS_RIGHT: if ( vel.x <  5 ) force =  50; break;
+    }*/
+    bernie.body.ApplyForce(new b2Vec2(force,0), bernie.body.GetWorldCenter());
+    //body->ApplyForce( b2Vec2(force,0), body->GetWorldCenter() );
+
        
       for(var i=0; i<actors.length; i++){
 
@@ -209,17 +252,17 @@ function crearActor(image, options){
           sprite.y = p.y *100;
           sprite.rotation = body.GetAngle()*180/Math.PI;
       }
-
-      cannon.body.rotation = cannon.sprite.rotation = angle*180/Math.PI;
+      //bernie.body.x =bernie.sprite.x +=speed;
+      //bernie.body.rotation = bernie.sprite.rotation = angle*180/Math.PI;
        
   }
          
 function onKEY_DOWN (e)          {
     console.log(e.keyCode)
-    if(e.keyCode == 37) l = true;               
-    if(e.keyCode == 38) u = true;
-    if(e.keyCode == 39) r = true;
-    if(e.keyCode == 40) d = true;
+    if(e.keyCode == 37) KEY_LEFT = true;               
+    if(e.keyCode == 38) KEY_UP = true;
+    if(e.keyCode == 39) KEY_RIGHT = true;
+    if(e.keyCode == 40) KEY_DOWN = true;
     if(e.keyCode == 32) {
       KEY_SPACE = true;
       dispara();
@@ -227,14 +270,14 @@ function onKEY_DOWN (e)          {
 }
           
 function onKEY_UP (e){
-    if(e.keyCode == 37) l = false;
-    if(e.keyCode == 38) u = false;
-    if(e.keyCode == 39) r = false;
-    if(e.keyCode == 40) d = false;
+    if(e.keyCode == 37) KEY_LEFT = false;
+    if(e.keyCode == 38) KEY_UP = false;
+    if(e.keyCode == 39) KEY_RIGHT = false;
+    if(e.keyCode == 40) KEY_DOWN = false;
     if(e.keyCode == 40) KEY_SPACE = false;
 }
 
-      function onEnterFrameT1(e) 
+      function onEnterFrameText(e) 
           {
                var texto = e.target;
                //texto.x += 2;
@@ -261,11 +304,11 @@ function crearTexto(){
   t1   = new TextField();
   t1.selectable = false; // default is true
   t1.setTextFormat(f1);
-  t1.text = "Bernie's 110010's";
+  t1.text = "Hi ha coses a la vida que són evitables....";
   t1.width = t1.textWidth; 
   t1.height = t1.textHeight;
   t1.x = t1.y = 309;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameT1);
+  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
 
   return t1;
  
@@ -275,40 +318,49 @@ function crearTexto(){
 
 
 
-function debugDraw(){
 
-  var debugDraw = new b2DebugDraw();
-debugDraw.SetSprite(document.getElementById("c").getContext("2d"));
-debugDraw.SetDrawScale(SCALE);
-debugDraw.SetFillAlpha(0.3);
-debugDraw.SetLineThickness(1.0);
-debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-world.SetDebugDraw(debugDraw)
-}
 
 function dispara(){
 
     var foto ='yoandy.png';
-    var bola = crearAlumno('yoandy');
-    //cannon.body.SetPosition(2,1);
     
-    bola.body.SetPositionAndAngle(new b2Vec2(1,1),0);
+    
     
     
 
-    
-    var p = bola.body.GetPosition();
+  /*  
+    var p = cannon.body.GetPosition();
 
 
     bola.sprite.x = p.x *100;   // updating sprite
     bola.sprite.y = p.y *100;
     bola.sprite.rotation = bola.body.GetAngle()*180/Math.PI;
+*/
+    
+      options={shape:'ball', scale:0.5,width:200,height:269,random:false, position:{x:1,y:1}};
 
+    bola = crearActor('yoandy.png',options);
+    bola.body.SetPositionAndAngle(new b2Vec2(2,1),0);
+    stage.addChild(bola.sprite);
+    actors.push(bola);
 
-  stage.addChild(bola.sprite);
-  actors.push(bola);
-
-
+    bola.sprite.addEventListener(MouseEvent.CLICK, function(){
+      
+      //angle = cannon.body.GetAngle();
+      console.log('cannon.body.GetAngle():'+cannon.body.GetAngle());
+      console.log('cannon.body.rotation:'+cannon.body.rotation);
+      //console.log('cannon.sprite.rotation:'+cannon.sprite.rotation);
+      
+      var x = Math.cos(cannon.body.rotation)/1;
+      var y = Math.sin(cannon.body.rotation)/1;
+      console.log('x:'+ x +  '  y:'+y);
+      bola.sprite.body.ApplyImpulse(new b2Vec2( x*10,y), bola.sprite.body.GetWorldCenter())
+      
+      console.log("eeeee2");
+      
+    });  
+   
+  
 
 }
 
