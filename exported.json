@@ -1,90 +1,90 @@
 
 {
-   "box2d": {
-      "images": {
-      "image": [
-      {
-         "path":"file:///Users/jose/Documents/devel/bernat/tests/numero1.png",
-         "name":"file:///Users/jose/Documents/devel/bernat/tests/numero1.png",
-         "x":"-33",
-         "y":"348",
-         "rotation":"0",
-         "scaleX":"1",
-         "scaleY":"1",
-         "zDepth":"1",
-         "pinned":"false",
-         "atlas":"null"
-      }
-      ]
-      },
-      "bodies": {
-      "body": [
-         {
-            "name":"body2",
-            "x":"-49",
-            "y":"265",
-            "type":"dynamic",
-            "bullet":"false",
-            "image":"null",
-            "fixtures": {
-            "fixture": [
-               {
-                  "name":"281",
-                  "shapeType":"polygonShape",
-                  "restitution":"1",
-                  "density":"1",
-                  "friction":"1",
-                  "isSensor":"false",
-               "vertex": [
-               {
-                  "x":"115",
-                  "y":"129"
-               },
-               {
-                  "x":"-163",
-                  "y":"137"
-               },
-               {
-                  "x":"446",
-                  "y":"44"
-               }
-               ]
-               },
-               {
-                  "name":"282",
-                  "shapeType":"polygonShape",
-                  "restitution":"1",
-                  "density":"1",
-                  "friction":"1",
-                  "isSensor":"false",
-               "vertex": [
-               {
-                  "x":"-103",
-                  "y":"-213"
-               },
-               {
-                  "x":"446",
-                  "y":"44"
-               },
-               {
-                  "x":"-163",
-                  "y":"137"
-               }
-               ]
-               }
+    "box2d": {
+        "images": {
+            "image": [
+                {
+                    "path":"file:///Users/jose/Documents/devel/bernat/tests/numero1.png",
+                    "name":"file:///Users/jose/Documents/devel/bernat/tests/numero1.png",
+                    "x":"-33",
+                    "y":"348",
+                    "rotation":"0",
+                    "scaleX":"1",
+                    "scaleY":"1",
+                    "zDepth":"1",
+                    "pinned":"false",
+                    "atlas":"null"
+                }
             ]
+        },
+        "bodies": {
+            "body": [
+                {
+                    "name":"body2",
+                    "x":"-49",
+                    "y":"265",
+                    "type":"dynamic",
+                    "bullet":"false",
+                    "image":"null",
+                    "fixtures": {
+                        "fixture": [
+                            {
+                                "name":"281",
+                                "shapeType":"polygonShape",
+                                "restitution":"1",
+                                "density":"1",
+                                "friction":"1",
+                                "isSensor":"false",
+                                "vertex": [
+                                    {
+                                        "x":"115",
+                                        "y":"129"
+                                    },
+                                    {
+                                        "x":"-163",
+                                        "y":"137"
+                                    },
+                                    {
+                                        "x":"446",
+                                        "y":"44"
+                                    }
+                                ]
+                            },
+                            {
+                                "name":"282",
+                                "shapeType":"polygonShape",
+                                "restitution":"1",
+                                "density":"1",
+                                "friction":"1",
+                                "isSensor":"false",
+                                "vertex": [
+                                    {
+                                        "x":"-103",
+                                        "y":"-213"
+                                    },
+                                    {
+                                        "x":"446",
+                                        "y":"44"
+                                    },
+                                    {
+                                        "x":"-163",
+                                        "y":"137"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "joints": {
+        },
+        "metaData": {
+        },
+        "settings": {
+            "setting": {
+                "isLocked":"true"
             }
-         }
-      ]
-      },
-   "joints": {
-   },
-   "metaData": {
-   },
-      "settings": {
-      "setting": {
-         "isLocked":"true"
-      }
-      }
-   }
+        }
+    }
 }
