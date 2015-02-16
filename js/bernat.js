@@ -91,6 +91,8 @@ var estadoCannon='parado';
 
 var doh = "doh";
 var doh32 = "doh32";
+var crash = "doh32";
+
                 
               
 function preload_doh () {
@@ -102,18 +104,22 @@ function preload_doh32 () {
  
     createjs.Sound.registerSound("audio/doh32.wav", doh32);
 }
-function playSoundDoh (sound) {
-        
-        createjs.Sound.play(doh);
-        
+function preload_crash () {
+ 
+    createjs.Sound.registerSound("audio/crash.wav", crash);
 }
 
-function playSoundDoh32 (sound) {
-        
-        createjs.Sound.play(doh32);
-        
+function playSoundDoh (sound) {
+        createjs.Sound.play(doh);        
 }
-          
+
+function playSoundDoh32 (sound) {        
+        createjs.Sound.play(doh32); 
+}
+ 
+ function playSoundCrash (sound) {        
+        createjs.Sound.play(crash); 
+}         
 function init() {   
 
     preload_doh();
@@ -142,19 +148,20 @@ function init() {
     crearTextoIntro2();// "...que son evitables"
 
     crearAlumnos();
-/*
+
     crearTextoPiano(); // " D'altres no tant..."
     crearPiano();
+    
     // pausa 3s
     crearTextoYoandy(); // " D'altres son impossible!!"
     dispararYoandys();
 
     // pausa 3s
-    crearTextoFelitats1(); // " Altres tambe son invenitables pero mes agradables"
+    //crearTextoFelitats1(); // " Altres tambe son invenitables pero mes agradables"
     // pausa 3s
-    crearTextoFelitats2(); // " Felicitats 110010s"
-    crearSSD();
-    */
+    //crearTextoFelitats2(); // " Felicitats 110010s"
+    //crearSSD();
+    
 
 
                   
@@ -163,7 +170,7 @@ function init() {
 
 function crearBernie(){
     var options = {};
-    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:2,y:0}};
+    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:5,y:0}};
     bernie = crearActor('Bernie.png',options);
     stage.addChild(bernie.sprite);
     actors.push(bernie);  
@@ -200,6 +207,9 @@ function crearActor(image, options){
   }else{
     fixtureDef.shape = new b2PolygonShape();
     fixtureDef.shape.SetAsBox(1,1);
+    fixtureDef.restitution = 1;
+    fixtureDef.friction = 0.3
+    fixtureDef.density = 1
   }
 
   if (options.random == true){
@@ -254,6 +264,31 @@ function crearActor(image, options){
 
 }
 
+function crearPiano(){
+    var options = {};
+    options={shape:'box', scale:0.5,width:269,height:313,random:false, position:{x:bernie.body.GetPosition().x,y:0}};
+    var piano = crearActor('Piano.png',options);
+    stage.addChild(piano.sprite);
+    actors.push(piano);  
+
+}
+
+function dispararYoandys(){
+    
+    playSoundCrash();
+    for (var i=0; i < 100 ; i++){
+      var options = {};
+      options={shape:'ball', scale:0.5,width:269,height:313,random:false, position:{x:bernie.body.GetPosition().x+1,y:0}};
+      var yoandy = crearActor('yoandy.png',options);
+      stage.addChild(yoandy.sprite);
+      actors.push(yoandy);  
+    }
+      
+    
+  
+
+}
+
 function setUpCollisions(world){
   var listener = new Box2D.Dynamics.b2ContactListener;
     listener.BeginContact = function(contact) {
@@ -266,9 +301,15 @@ function setUpCollisions(world){
       }
 
       if (bodyA.nombre =='Bernie.png' || bodyB.nombre == 'Bernie.png'){
-        playSoundDoh();
+        if (bodyA.nombre =='Piano.png' || bodyB.nombre == 'Piano.png'){
+          playSoundDoh();
+        }else{
+          playSoundCrash();
+        }
+
       }
         
+        //237375__squareal__car-crash.wav();
       
 
     }
@@ -290,15 +331,7 @@ function setUpCollisions(world){
       world.ClearForces();
 
           
-      // eliminar de la lista de cuerpos de Box2D y su correspondiente Sprite
-      for (var i in destroy_list) {
-        var body = destroy_list[i];
-        stage.removeChild(body.sprite);
-        world.DestroyBody(body);
-
-      }
-      // resetear la lista de
-      destroy_list=[];
+     removeActors();
        
 
       var vel = bernie.body.GetLinearVelocity(); // vel = body->GetLinearVelocity();
@@ -325,6 +358,25 @@ function setUpCollisions(world){
           
       }
        
+  }
+
+  function removeActors(){
+     // eliminar de la lista de cuerpos de Box2D y su correspondiente Sprite
+      for (var i =0; i < destroy_list.length; i++) {
+        var body = destroy_list[i];
+        stage.removeChild(body.sprite);
+
+        /*for (var actor in actors){
+          if (actor.body == body){
+            actors.splice()
+          }
+
+        }*/
+        world.DestroyBody(body);
+
+      }
+      // resetear la lista de
+      destroy_list=[];
   }
          
 function onKEY_DOWN (e)          {
@@ -353,6 +405,20 @@ function onEnterFrameText(e)     {
     }
 
      
+
+function crearTexto(text, x,y, textFormat){
+   
+  var textField  = new TextField();
+  textField.selectable = false; // default is true
+  textField.setTextFormat(textFormat);
+  textField.text = "Hi ha coses a la vida...";
+  textField.width = t1.textWidth; 
+  textField.height = t1.textHeight;
+  textField.x =0;
+  textField.y = 100;
+  textField.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(textField);
+}
 
 function crearTextoIntro1(){
   var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
@@ -410,54 +476,40 @@ function crearTextoIntro2(){
 
 
 
-
-
-
-function disparaYoandys(){
-
-  /* NP VALE, HAY QUE REHACER TODO */
-
-    var foto ='yoandy.png';
-    
-    
-    
-    
-
-  /*  
-    var p = cannon.body.GetPosition();
-
-
-    bola.sprite.x = p.x *100;   // updating sprite
-    bola.sprite.y = p.y *100;
-    bola.sprite.rotation = bola.body.GetAngle()*180/Math.PI;
-*/
-    
-      options={shape:'ball', scale:0.5,width:200,height:269,random:false, position:{x:1,y:1}};
-
-    bola = crearActor('yoandy.png',options);
-    bola.body.SetPositionAndAngle(new b2Vec2(2,1),0);
-    stage.addChild(bola.sprite);
-    actors.push(bola);
-
-    bola.sprite.addEventListener(MouseEvent.CLICK, function(){
-      
-      //angle = cannon.body.GetAngle();
-      console.log('cannon.body.GetAngle():'+cannon.body.GetAngle());
-      console.log('cannon.body.rotation:'+cannon.body.rotation);
-      //console.log('cannon.sprite.rotation:'+cannon.sprite.rotation);
-      
-      var x = Math.cos(cannon.body.rotation)/1;
-      var y = Math.sin(cannon.body.rotation)/1;
-      console.log('x:'+ x +  '  y:'+y);
-      bola.sprite.body.ApplyImpulse(new b2Vec2( x*10,y), bola.sprite.body.GetWorldCenter())
-      
-      
-      
-    });  
+function crearTextoPiano(){
+  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
    
+  var t1;
   
-
+  t1   = new TextField();
+  t1.selectable = false; // default is true
+  t1.setTextFormat(f1);
+  t1.text = "... d'altres no tant";
+  t1.width = t1.textWidth; 
+  t1.height = t1.textHeight;
+  t1.x =0;
+  t1.y = 140;
+  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(t1);
 }
+
+function crearTextoYoandy(){
+  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+   
+  var t1;
+  
+  t1   = new TextField();
+  t1.selectable = false; // default is true
+  t1.setTextFormat(f1);
+  t1.text = "... y d'altres son IMPOSSIBLE D'EVITAR!!";
+  t1.width = t1.textWidth; 
+  t1.height = t1.textHeight;
+  t1.x =0;
+  t1.y = 140;
+  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(t1);
+}
+
 
 
 function crearFondo(){
