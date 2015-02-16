@@ -238,9 +238,16 @@ function crearActor(image, options){
 
     actor.body = body;
     actor.sprite =  sprite;
-    
-
-   
+    var force;
+    if (options.random){
+        force=3;
+       if (Math.random() > 0.5){
+        force*=-1;
+      }
+        
+        body.ApplyImpulse(new b2Vec2(force,0), body.GetWorldCenter());   
+    }
+  
     return actor;
 
 
@@ -306,9 +313,7 @@ function setUpCollisions(world){
       }
         
       bernie.body.ApplyForce(new b2Vec2(force,0), bernie.body.GetWorldCenter());
-      //body->ApplyForce( b2Vec2(force,0), body->GetWorldCenter() );
-
-     
+       
       for(var i=0; i<actors.length; i++){
 
           var body  = actors[i].body;
@@ -317,10 +322,8 @@ function setUpCollisions(world){
           sprite.x = p.x *100;   // updating sprite
           sprite.y = p.y *100;
           sprite.rotation = body.GetAngle()*180/Math.PI;
-          console.log("sprite.rotation:"+ sprite.rotation+" body.GetAngle():"+body.GetAngle() );
+          
       }
-      //bernie.body.x =bernie.sprite.x +=speed;
-      //bernie.body.rotation = bernie.sprite.rotation = angle*180/Math.PI;
        
   }
          
