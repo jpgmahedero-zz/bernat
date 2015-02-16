@@ -411,9 +411,9 @@ function crearTexto(text, x,y, textFormat){
   var textField  = new TextField();
   textField.selectable = false; // default is true
   textField.setTextFormat(textFormat);
-  textField.text = "Hi ha coses a la vida...";
-  textField.width = t1.textWidth; 
-  textField.height = t1.textHeight;
+  textField.text = text;
+  textField.width = textField.textWidth; 
+  textField.height = textField.textHeight;
   textField.x =0;
   textField.y = 100;
   textField.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
@@ -421,93 +421,30 @@ function crearTexto(text, x,y, textFormat){
 }
 
 function crearTextoIntro1(){
-  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-   
-  var t1;
+  var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+  crearTexto("Hi ha coses a la vida...",0,100,tf);
   
-  t1   = new TextField();
-  t1.selectable = false; // default is true
-  t1.setTextFormat(f1);
-  t1.text = "Hi ha coses a la vida...";
-  t1.width = t1.textWidth; 
-  t1.height = t1.textHeight;
-  t1.x =0;
-  t1.y = 100;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-  stage.addChild(t1);
 }
 
 
 function crearTextoIntro2(){
-  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-   
-  var t1;
-  
-  t1   = new TextField();
-  t1.selectable = false; // default is true
-  t1.setTextFormat(f1);
-  t1.text = "... que son evitables";
-  t1.width = t1.textWidth+10; 
-  t1.height = t1.textHeight;
-  t1.x =100;
-  t1.y = 200;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-  stage.addChild(t1);
-
+  var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+  crearTexto("...que es poden evitar",0,150,tf);
   f1 = new TextFormat("Times new Roman", 20, 0x880099, true, true);
-   
-  
-  
-  t1   = new TextField();
-  t1.selectable = false; // default is true
-  t1.setTextFormat(f1);
-  t1.text = "fes servir els cursors";
-  t1.width = t1.textWidth+10; 
-  t1.height = t1.textHeight;
-  t1.x =200;
-  t1.y = 280;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-
-
-  stage.addChild(t1);
- 
-
+  crearTexto("fes servir els cursors",0,190,tf);
 }
 
 
 
 function crearTextoPiano(){
-  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-   
-  var t1;
+    var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("... d'altres no tant",0,200,tf);
   
-  t1   = new TextField();
-  t1.selectable = false; // default is true
-  t1.setTextFormat(f1);
-  t1.text = "... d'altres no tant";
-  t1.width = t1.textWidth; 
-  t1.height = t1.textHeight;
-  t1.x =0;
-  t1.y = 140;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-  stage.addChild(t1);
 }
 
 function crearTextoYoandy(){
-  var f1 = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-   
-  var t1;
-  
-  t1   = new TextField();
-  t1.selectable = false; // default is true
-  t1.setTextFormat(f1);
-  t1.text = "... y d'altres son IMPOSSIBLE D'EVITAR!!";
-  t1.width = t1.textWidth; 
-  t1.height = t1.textHeight;
-  t1.x =0;
-  t1.y = 140;
-  t1.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-  stage.addChild(t1);
+    var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("... y d'altres son IMPOSSIBLE D'EVITAR!!",0,200,tf);   
 }
 
 
