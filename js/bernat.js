@@ -142,35 +142,76 @@ function init() {
 
     crearFondo();  
     // pause 3s
+
     crearBernie();
-    crearTextoIntro1(); // "Hi ha coses ala vida..."
+
+    var textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("Hi ha coses a la vida...",0,100,textFormat);
+
     // pausa 10s
-    crearTextoIntro2();// "...que son evitables"
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("...que es poden evitar",0,150,textFormat);
+    textFormat = new TextFormat("Times new Roman", 20, 0x880099, true, true);
+    crearTexto("fes servir els cursors",0,200,textFormat);
 
-    crearAlumnos();
+    //crearAlumnos();
 
-    crearTextoPiano(); // " D'altres no tant..."
-    crearPiano();
+    //crearTextoPiano(); // " D'altres no tant..."
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("... D'altres no tant...",0,250, textFormat);
+    //crearPiano();
     
-    // pausa 3s
-    crearTextoYoandy(); // " D'altres son impossible!!"
-    dispararYoandys();
+    //// pausa 3s
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("i d'altres.. NO ES PODEN EVITAR MAI!!",0,300, textFormat);
+    //dispararYoandys();
+    
+
+    //// pausa 3s
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("N'hi ha tambe d'inevitables",0,350, textFormat);
+    //crearPiano();
+
 
     // pausa 3s
-    //crearTextoFelitats1(); // " Altres tambe son invenitables pero mes agradables"
-    // pausa 3s
-    //crearTextoFelitats2(); // " Felicitats 110010s"
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("Pero mes agradables!!!",0,400, textFormat);
     //crearSSD();
+
+    textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
+    crearTexto("Feiciltats 110010's",0,450, textFormat);
+                
     
+}
 
 
-                  
-    
+function crearTexto(text, x,y, textFormat){
+   
+  var textField  = new TextField();
+  textField.selectable = false; // default is true
+  textField.setTextFormat(textFormat);
+  textField.text = text;
+  textField.width = textField.textWidth; 
+  textField.height = textField.textHeight;
+  textField.x =x;
+  textField.y = y;
+  textField.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
+  stage.addChild(textField);
 }
 
 function crearBernie(){
     var options = {};
-    options={shape:'box', scale:0.5,width:269,height:269,random:false, position:{x:5,y:0}};
+    options={
+        shape:'box', 
+        scale:0.5,
+        width:269, height:269,
+        random:false, 
+        position:{  x:5,y:5},
+            fixtureDef:{  restitution : 0.7,
+                          friction : 0.5,
+                          density : 0.5
+                        }
+      };
     bernie = crearActor('Bernie.png',options);
     stage.addChild(bernie.sprite);
     actors.push(bernie);  
@@ -201,12 +242,17 @@ function crearActor(image, options){
   if (options.shape == 'ball'){
     fixtureDef.shape = new b2CircleShape();
     fixtureDef.shape.SetRadius(options.scale);
-    fixtureDef.restitution = 1;
-    fixtureDef.friction = 0.3
-    fixtureDef.density = 1
-  }else{
+   
+  } 
+  if (options.shape== 'box'){
     fixtureDef.shape = new b2PolygonShape();
-    fixtureDef.shape.SetAsBox(1,1);
+    fixtureDef.shape.SetAsBox(1,1);  
+  }
+  if (options.fixtureDef){
+    fixtureDef.restitution = options.restitution;
+    fixtureDef.friction = options.friction;
+    fixtureDef.density = options.density;
+  }else{ // default values for fixtureDef
     fixtureDef.restitution = 1;
     fixtureDef.friction = 0.3
     fixtureDef.density = 1
@@ -214,8 +260,6 @@ function crearActor(image, options){
 
   if (options.random == true){
     bodyDef.position.Set(Math.random()*7, -5 + Math.random()*5);
-    //Math.random() * (max - min) + min;
-   // bodyDef.angle = Math.random() * (2*Math.PI - 0) + 0;
     bodyDef.angle = Math.random() * Math.PI * 2;
     bodyDef.angle = 0;
 
@@ -232,32 +276,32 @@ function crearActor(image, options){
   bitmap.y = -options.height/2;
   
 
-    var sprite = new Sprite(); 
-    //sprite.scaleX = sprite.scaleY = 0.3 + Math.random()*0.7;    // "half width"
-    sprite.scaleX = sprite.scaleY = options.scale;    // "half width"
-    sprite.addChild(bitmap);
-    sprite.rotation = body.GetAngle()*180 / Math.PI;
-    //sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
-
-    
-   
-    var actor={};
-
-    body.nombre = image;
-    body.sprite = sprite;
-
-    actor.body = body;
-    actor.sprite =  sprite;
-    var force;
-    if (options.random){
-        force=3;
-       if (Math.random() > 0.5){
-        force*=-1;
-      }
-        
-        body.ApplyImpulse(new b2Vec2(force,0), body.GetWorldCenter());   
-    }
+  var sprite = new Sprite(); 
   
+  sprite.scaleX = sprite.scaleY = options.scale;    
+  sprite.addChild(bitmap);
+  sprite.rotation = body.GetAngle()*180 / Math.PI;
+  //sprite.addEventListener(MouseEvent.MOUSE_MOVE, Jump);  
+
+  
+ 
+  var actor={};
+
+  body.nombre = image;
+  body.sprite = sprite;
+
+  actor.body = body;
+  actor.sprite =  sprite;
+  var force;
+  if (options.random){
+      force=3;
+     if (Math.random() > 0.5){
+      force*=-1;
+    }
+      
+      body.ApplyImpulse(new b2Vec2(force,0), body.GetWorldCenter());   
+  }
+
     return actor;
 
 
@@ -266,7 +310,7 @@ function crearActor(image, options){
 
 function crearPiano(){
     var options = {};
-    options={shape:'box', scale:0.5,width:269,height:313,random:false, position:{x:bernie.body.GetPosition().x,y:0}};
+    options={shape:'box', scale:1,width:269,height:313,random:false, position:{x:bernie.body.GetPosition().x,y:0}};
     var piano = crearActor('Piano.png',options);
     stage.addChild(piano.sprite);
     actors.push(piano);  
@@ -275,17 +319,43 @@ function crearPiano(){
 
 function dispararYoandys(){
     
-    playSoundCrash();
+    
     for (var i=0; i < 100 ; i++){
       var options = {};
-      options={shape:'ball', scale:0.5,width:269,height:313,random:false, position:{x:bernie.body.GetPosition().x+1,y:0}};
+      options={
+          shape:'ball', 
+          scale:0.5,
+          width:269, height:313,
+          random:false, 
+          position:{ x:bernie.body.GetPosition().x+1,
+                    y:0
+          }
+      };
       var yoandy = crearActor('yoandy.png',options);
       stage.addChild(yoandy.sprite);
       actors.push(yoandy);  
     }
-      
-    
-  
+}
+
+function crearSSD(){
+  var options = {};
+    options={
+            shape:'box', 
+            scale:1,
+            width:360,height:235,
+            random:false, 
+            position:{  x:bernie.body.GetPosition().x,
+                        y:0
+                      },
+            fixtureDef:{  restitution : 1,
+                          friction : 1,
+                          density : 1
+                        }
+            }
+
+    var ssd = crearActor('Ssd.png',options);
+    stage.addChild(ssd.sprite);
+    actors.push(ssd);  
 
 }
 
@@ -302,9 +372,9 @@ function setUpCollisions(world){
 
       if (bodyA.nombre =='Bernie.png' || bodyB.nombre == 'Bernie.png'){
         if (bodyA.nombre =='Piano.png' || bodyB.nombre == 'Piano.png'){
-          playSoundDoh();
-        }else{
           playSoundCrash();
+        }else{
+          playSoundDoh();
         }
 
       }
@@ -380,7 +450,7 @@ function setUpCollisions(world){
   }
          
 function onKEY_DOWN (e)          {
-    console.log(e.keyCode)
+
     if(e.keyCode == 37) KEY_LEFT = true;               
     if(e.keyCode == 38) KEY_UP = true;
     if(e.keyCode == 39) KEY_RIGHT = true;
@@ -405,50 +475,6 @@ function onEnterFrameText(e)     {
     }
 
      
-
-function crearTexto(text, x,y, textFormat){
-   
-  var textField  = new TextField();
-  textField.selectable = false; // default is true
-  textField.setTextFormat(textFormat);
-  textField.text = text;
-  textField.width = textField.textWidth; 
-  textField.height = textField.textHeight;
-  textField.x =0;
-  textField.y = 100;
-  textField.addEventListener(Event.ENTER_FRAME, onEnterFrameText);
-  stage.addChild(textField);
-}
-
-function crearTextoIntro1(){
-  var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-  crearTexto("Hi ha coses a la vida...",0,100,tf);
-  
-}
-
-
-function crearTextoIntro2(){
-  var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-  crearTexto("...que es poden evitar",0,150,tf);
-  f1 = new TextFormat("Times new Roman", 20, 0x880099, true, true);
-  crearTexto("fes servir els cursors",0,190,tf);
-}
-
-
-
-function crearTextoPiano(){
-    var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-    crearTexto("... d'altres no tant",0,200,tf);
-  
-}
-
-function crearTextoYoandy(){
-    var tf = new TextFormat("Times new Roman", 60, 0x880099, true, true);
-    crearTexto("... y d'altres son IMPOSSIBLE D'EVITAR!!",0,200,tf);   
-}
-
-
-
 function crearFondo(){
   // background
     //var bg = new Bitmap( new BitmapData("winter2.jpg") );
