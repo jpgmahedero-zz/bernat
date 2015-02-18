@@ -91,23 +91,65 @@ var estadoCannon='parado';
 
 var doh = "doh";
 var doh32 = "doh32";
-var crash = "doh32";
+var crash = "crash";
+var audioManifest;
 
-                
-              
+function setupManifest() {
+    manifest = [{
+        src:  "audio/doh.ogg",
+        id: "doh"
+    }, {
+        src:  "audio/doh32.ogg",
+        id: "doh32"
+    }, {
+        src:  "audio/crash.ogg",
+        id: "crash"
+    }
+ 
+    ];
+    
+}
+ 
+function startPreload() {
+    preload = new createjs.LoadQueue(true);
+    preload.installPlugin(createjs.Sound);         
+    preload.on("fileload", handleFileLoad);
+    preload.on("progress", handleFileProgress);
+    preload.on("complete", loadComplete);
+    preload.on("error", loadError);
+    preload.loadManifest(manifest);
+}             
+
+function handleFileLoad(event) {
+    console.log("A file has loaded of type: " + event.item.type);
+    if(event.item.id == "logo"){
+        console.log("Logo is loaded");
+        //create bitmap here
+    }
+}
+ 
+ 
+function loadError(evt) {
+    console.log("Error!",evt.text);
+}
+
+function handleFileProgress(event) {
+    //progressText.text = (preload.progress*100|0) + " % Loaded";
+    console.log(preload.progress*100 + " % Loaded")
+    //stage.update();
+}
+ 
+function loadComplete(event) {
+    console.log("Finished Loading Assets");
+}
+
+
 function preload_doh () {
+  createjs.Sound.registerSound({id:"soundId", src:"assets/music.ogg"});
     createjs.Sound.registerSound("audio/doh.ogg", doh);
  
 }
 
-function preload_doh32 () {
- 
-    createjs.Sound.registerSound("audio/doh32.wav", doh32);
-}
-function preload_crash () {
- 
-    createjs.Sound.registerSound("audio/crash.wav", crash);
-}
 
 function playSoundDoh (sound) {
         createjs.Sound.play(doh);        
@@ -122,9 +164,10 @@ function playSoundDoh32 (sound) {
 }         
 function init() {   
 
-    preload_doh();
+    //preload_doh();
 
-
+setupManifest();
+startPreload();
     stage = new Stage("bernies_canvas");
     
     
@@ -164,13 +207,14 @@ function init() {
     //// pausa 3s
     textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
     crearTexto("i d'altres.. NO ES PODEN EVITAR MAI!!",0,300, textFormat);
+    playSoundDoh32();
     //dispararYoandys();
     
 
     //// pausa 3s
     textFormat = new TextFormat("Times new Roman", 60, 0x880099, true, true);
     crearTexto("N'hi ha tambe d'inevitables",0,350, textFormat);
-    //crearPiano();
+
 
 
     // pausa 3s
@@ -206,7 +250,7 @@ function crearBernie(){
         scale:0.5,
         width:269, height:269,
         random:false, 
-        position:{  x:5,y:5},
+        position:{  x:5,y:2},
             fixtureDef:{  restitution : 0.7,
                           friction : 0.5,
                           density : 0.5
@@ -365,7 +409,7 @@ function setUpCollisions(world){
       var bodyA = contact.GetFixtureA().GetBody();
       var bodyB = contact.GetFixtureB().GetBody();
 
-      //console.log(bodyA.nombre + " <---> " + bodyB.nombre);
+      console.log(bodyA.nombre + " <---> " + bodyB.nombre);
       if (bodyA.nombre =='suelo' && bodyA.nombre != 'Bernie.png'){
         destroy_list.push(bodyB);
       }
